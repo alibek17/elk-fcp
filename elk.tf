@@ -189,3 +189,7 @@ resource "aws_instance" "elk" {
       "sudo systemctl enable filebeat"
     ]
   }
+  tags = {
+      Name = "Elk"
+    }
+}
