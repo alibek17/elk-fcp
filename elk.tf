@@ -33,7 +33,7 @@ resource "aws_instance" "elk" {
         "sudo yum install java-1.8.0-openjdk -y",
         "sudo yum install epel-release -y",
         "sudo mv /tmp/elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo",
-        "sudo yum install certbot-nginx -y"
+        "sudo yum install certbot-nginx -y",
         "sudo yum install nginx -y",
         "sudo systemctl start nginx",
         "sudo certbot --nginx -d elk.${var.domain} -n --agree-tos --email ${var.email}",
@@ -74,7 +74,7 @@ resource "aws_instance" "elk" {
         "sudo systemctl enable kibana -y",
         "sudo systemctl start kibana -y",
         "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users"
-        "sudo cat <<EOF > /etc/nginx/conf.d/${var.domain}.conf
+        """sudo cat <<EOF > /etc/nginx/conf.d/${var.domain}.conf
                 server {
                     listen 80;
 
@@ -99,7 +99,7 @@ resource "aws_instance" "elk" {
                     ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
                 }
 
-                EOF",
+                EOF""",
         "sudo systemctl restart nginx",
         "sudo systemctl restart kibana",
         "sudo setsebool httpd_can_network_connect 1 -P",
