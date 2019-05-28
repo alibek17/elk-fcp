@@ -39,7 +39,7 @@ resource "aws_instance" "elk" {
         "sudo certbot --nginx -d elk.${var.domain} -n --agree-tos --email ${var.email}",
         "sudo openssl dhparam -out /etc/ssl/certs/dhparam.pem 2048",
         "sudo systemctl reload nginx",
-        "sudo echo '15 3 * * * /usr/bin/certbot renew --quiet' > /var/spool/root"
+        "sudo echo '15 3 * * * /usr/bin/certbot renew --quiet' > /var/spool/root",
         "sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch"
     ]
   }
@@ -73,7 +73,7 @@ resource "aws_instance" "elk" {
         "sudo yum install kibana -y",
         "sudo systemctl enable kibana -y",
         "sudo systemctl start kibana -y",
-        "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users"
+        "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users",
         """sudo cat <<EOF > /etc/nginx/conf.d/${var.domain}.conf
                 server {
                     listen 80;
