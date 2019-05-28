@@ -75,29 +75,7 @@ resource "aws_instance" "elk" {
         "sudo systemctl start kibana -y",
         "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users",
         """sudo cat <<EOF > /etc/nginx/conf.d/${var.domain}.conf
-                server {
-                    listen 80;
-
-                    server_name ${var.domain}m;
-
-                    auth_basic 'Restricted Access';
-                    auth_basic_user_file /etc/nginx/htpasswd.users;
-
-                    location / {
-                        proxy_pass http://localhost:5601;
-                        proxy_http_version 1.1;
-                        proxy_set_header Upgrade $http_upgrade;
-                        proxy_set_header Connection 'upgrade';
-                        proxy_set_header Host $host;
-                        proxy_cache_bypass $http_upgrade;
-                    }
-
-                    listen 443 ssl; # managed by Certbot
-                    ssl_certificate /etc/letsencrypt/live/fuchiyama.com/fullchain.pem; # managed by Certbot
-                    ssl_certificate_key /etc/letsencrypt/live/fuchiyama.com/privkey.pem; # managed by Certbot
-                    include /etc/letsencrypt/options-ssl-nginx.conf; # managed by Certbot
-                    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem; # managed by Certbot
-                }
+                
 
                 EOF""",
         "sudo systemctl restart nginx",
@@ -164,7 +142,28 @@ resource "aws_instance" "elk" {
       "sudo yum install filebeat"
     ]
   }
+  provisioner "file" {
+    source      = "nginx_dom.conf"
+    destination = "/tmp/nginx_dom.conf"
 
+    connection {
+      host        = "${self.public_ip}"
+      type        = "ssh"
+      user        = "${var.user}"
+      private_key = "${file(var.ssh_key_location)}"
+    }
+  }
+  provisioner "file" {
+    source      = "nginx_main.conf"
+    destination = "/tmp/nginx_main.conf"
+
+    connection {
+      host        = "${self.public_ip}"
+      type        = "ssh"
+      user        = "${var.user}"
+      private_key = "${file(var.ssh_key_location)}"
+    }
+  }
   provisioner "file" {
     source      = "filebeat.yaml"
     destination = "/tmp/filebeat.yaml"
@@ -185,6 +184,8 @@ resource "aws_instance" "elk" {
   }
     inline = [
       "sudo mv /tmp/filebeat.yaml /etc/filebeat/filebeat.yml",
+      "sudo mv /tmp/nginx_dom.conf /etc/nginx/conf.d/${var.domain}.conf",
+      "sudo mv /tmp/nginx_main.conf /etc/nginx/nginx.conf",
       "sudo filebeat modules enable system",
       "sudo filebeat setup --template -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:9200']",
       "sudo filebeat setup -e -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:9200'] -E setup.kibana.host=localhost:5601",
