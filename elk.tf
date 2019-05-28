@@ -66,14 +66,13 @@ resource "aws_instance" "elk" {
     inline = [
         "sudo rpm --import https://artifacts.elastic.co/GPG-KEY-elasticsearch",
         "sudo yum install elasticsearch -y",
-        "sudo mv /tmp/elasticsearch.repo /etc/yum.repos.d/elasticsearch.repo",
         "sudo mv /tmp/elasticsearch.yml /etc/elasticsearch/elasticsearch.yml",
         "sudo systemctl start elasticsearch",
         "sudo systemctl enable elasticsearch",
         "sudo yum install kibana -y",
         "sudo systemctl enable kibana -y",
         "sudo systemctl start kibana -y",
-        "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users",
+        "sudo echo kibanaadmin:`openssl passwd -apr1 '${var.password}'` | sudo tee -a /etc/nginx/htpasswd.users",
         "sudo systemctl restart nginx",
         "sudo systemctl restart kibana",
         "sudo setsebool httpd_can_network_connect 1 -P",
@@ -135,7 +134,7 @@ resource "aws_instance" "elk" {
       "sudo mv /tmp/30-elasticsearch-output.conf /etc/logstash/conf.d",
       "sudo systemctl start logstash",
       "sudo systemctl enable logstash",
-      "sudo yum install filebeat"
+      "sudo yum install filebeat -y"
     ]
   }
   provisioner "file" {
