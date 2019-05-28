@@ -74,10 +74,6 @@ resource "aws_instance" "elk" {
         "sudo systemctl enable kibana -y",
         "sudo systemctl start kibana -y",
         "sudo echo kibanaadmin:`openssl passwd -apr1 '${password}'` | sudo tee -a /etc/nginx/htpasswd.users",
-        """sudo cat <<EOF > /etc/nginx/conf.d/${var.domain}.conf
-                
-
-                EOF""",
         "sudo systemctl restart nginx",
         "sudo systemctl restart kibana",
         "sudo setsebool httpd_can_network_connect 1 -P",
