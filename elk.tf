@@ -111,8 +111,8 @@ resource "aws_instance" "elk" {
         "sudo sed -i 's/#output.logstash/output.logstash/g' /etc/filebeat/filebeat.yml",
         "sudo sed -i '/5044/ c \\ \\ hosts: [\"localhost:5044\"]' /etc/filebeat/filebeat.yml",
         "sudo filebeat modules enable system",
-        "sudo filebeat setup --template -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:9200']",
-        "sudo filebeat setup -e -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:9200'] -E setup.kibana.host=localhost:5601",
+        "sudo filebeat setup --template -E output.logstash.enabled=false -E 'output.elasticsearch.hosts=['localhost:9200']'"
+        "sudo filebeat setup -e -E output.logstash.enabled=false -E output.elasticsearch.hosts=['localhost:9200'] -E setup.kibana.host=localhost:5601"
         "sudo systemctl start filebeat",
         "sudo systemctl enable filebeat",
     ]
